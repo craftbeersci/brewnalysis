@@ -20,12 +20,15 @@ batch2
 
 #************************PRE REQUISITE*********************************************** 
 #knowing the size of the square
-L <- readline(prompt="Enter square side length: ")
-W <- readline(prompt="Enter width: ")
+#L <- readline(prompt="Enter square side length: ")
+#W <- readline(prompt="Enter width: ")
 
 #************************FUNCTION****************************************************
 
-cellcountFunc<- function(x) {
+#For this function, the size of the square is set a default value
+#The default value length is 0.2 and the default value for the depth is 0.1
+#To change these default value type cellcountFunc(data,L="enter the length of the square",D="Enter the depth of the square")
+cellcountFunc<- function(x,L=0.2,D=0.1) {
   ACPSS=c(x[,11]+x[,14])
   #ACPSS
   DF=c(x[,10])
@@ -83,7 +86,7 @@ celldenstime
 
 #************************Fit gamFunc****************************************************
 
-#predicted values for the gama function with an amplitude parameter.
+#predicted values for the gama + function with an amplitude parameter.
 gamAFunc <- function(gamAPar, tvec){
   A <- gamAPar[1]
   k <- gamAPar[2]
