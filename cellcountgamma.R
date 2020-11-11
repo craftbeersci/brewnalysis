@@ -11,7 +11,7 @@
 library("readxl")
 library("ggplot2")
 library(grid)
-data <- read_excel("~/Cellcountfunction/brewnalysis_test_data.xlsx") 
+data <- read_excel("brewnalysis_test_data.xlsx") 
 data  #verify if dataset well imported
 
 batch2<-data[8:13,]
@@ -20,17 +20,20 @@ batch2
 
 #************************PRE REQUISITE*********************************************** 
 #knowing the size of the square
-L <- readline(prompt="Enter square side length: ")
-W <- readline(prompt="Enter width: ")
+#L <- readline(prompt="Enter square side length: ")
+#D <- readline(prompt="Enter depth: ")
 
 #************************FUNCTION****************************************************
 
-cellcountFunc<- function(x) {
+#For this function, the size of the square is set a default value
+#The default value length is 0.2 and the default value for the depth is 0.1
+#To change these default value type cellcountFunc(data,L="enter the length of the square",D="Enter the depth of the square")
+cellcountFunc<- function(x,L=0.2,D=0.1) {
   ACPSS=c(x[,11]+x[,14])
   #ACPSS
   DF=c(x[,10])
   #DF
-  VSS=as.numeric(L)*as.numeric(L)*as.numeric(W)
+  VSS=as.numeric(L)*as.numeric(L)*as.numeric(D)
   VSS
   y<-data.frame(ACPSS,DF,VSS)
   y
