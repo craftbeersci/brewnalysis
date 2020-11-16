@@ -1,0 +1,47 @@
+---
+title: "Developing specific gravity modeling functions"
+author: "Arthur Rudolph"
+date: "Last update `r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readxl)
+
+source("spec_grav_function.R")
+```
+
+### Loading Brewery Data
+
+```{r}
+fermentation_data <- read_excel("brewnalysis_test_data.xlsx") %>%
+  janitor::clean_names()
+
+beer_a_b5 <- fermentation_data %>%
+  # dplyr::filter(brand == "beer_a", batch_number == 5) %>%
+  select(brand, batch_number, fermentation_day, gravity, p_h)
+
+grav_plot <- ggplot(beer_a_b5, aes(x = fermentation_day, y = gravity, color = brand, shape = factor(batch_number))) +
+  geom_point() +
+  geom_line()
+
+ph_plot <- ggplot(beer_a_b5, aes(x = fermentation_day, y = p_h, color = brand, shape = factor(batch_number))) +
+  geom_point() +
+  geom_line()
+
+grav_plot
+ph_plot
+
+```
+
+### Fitting the specific gravity data to a logistic curve
+
+```{r}
+
+
+
+```
+
