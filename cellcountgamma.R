@@ -11,98 +11,38 @@
 library("readxl")
 library("ggplot2")
 library(grid)
-data <- read_excel("~/Cellcountfunction/brewnalysis_test_data.xlsx") 
-data  #verify if dataset well imported
+source("brewnalysis_functions.R")
+data <- read_excel("brewnalysis_test_data.xlsx") 
+#data  
 
 batch2<-data[8:13,]
-batch2
+#batch2
 
-
-#************************PRE REQUISITE*********************************************** 
-#knowing the size of the square
-L <- readline(prompt="Enter square side length: ")
-W <- readline(prompt="Enter width: ")
-
-#************************FUNCTION****************************************************
-
-cellcountFunc<- function(x) {
-  ACPSS=c(x[,11]+x[,14])
-  #ACPSS
-  DF=c(x[,10])
-  #DF
-  VSS=as.numeric(L)*as.numeric(L)*as.numeric(W)
-  VSS
-  y<-data.frame(ACPSS,DF,VSS)
-  y
-  #table of 3 columns. 1st column= average cells per small square ; 2nd column=dilution factor ; 3rd column=volume small square (mL)
-  
-  
-  for (i in 1:nrow(y))
-    celldensity=c((y[,1]*y[,2])/y[,3])
-  return(celldensity)
-}
-
-#************************RESULT****************************************************
-
-#celldens = cellcountFunc(data)
-celldens = cellcountFunc(batch2)
-celldens
-#************************CONDITION FUNCTION****************************************************
-ConditionFunc<-function(x){
-  cond1<-c(paste(x[1,1],"batch",x[1,2]))
-  return(cond1)
-}
-#************************RESULT****************************************************
+#************************Condition*************************************************
 Cond1=ConditionFunc(batch2)
 Cond1
 
-#************************CELL DENSITY/TIME FUNCTION****************************************************
-TvecFunc<-function(x){
-  Time<-x[,5:6]
-  Time<-paste(Time$Date, format(as.POSIXct(Time$`Sample Time`), '%T'))
-  Tvec = numeric()
-  for(i in 1:(length(Time))) {
-    start<- Time [1]
-    finish<- Time[i]
-    A<-difftime(finish,start,units="hours")
-    Tvec = c(Tvec,A)
-  }
-  print(Tvec)
-  z<-data.frame(Tvec,celldens)
-  return(z)
-  
-}
-#************************RESULT****************************************************
+#************************Cell density ******************************************
+#For this function, the size of the square is set a default value
+#The default value length is 0.2 and the default value for the depth is 0.1
+#To change these default value type cellcountFunc(data,L="enter the length of 
+#the square",D="Enter the depth of the square")
+
+celldens = cellcountFunc(batch2)
+celldens
+
+
+#************************Cell density/time**************************************
 celldenstime=TvecFunc(batch2)
 celldenstime
 
-# plot(celldenstime)
-
-
-#Possible to merge these 2 functions depending on the result we want to obtain
-
-#************************Fit gamFunc****************************************************
-
-#predicted values for the basic gama function
-gamFunc <- function(gamPar, tvec){
-  k <- gamPar[1]
-  theta <- gamPar[2]
-  gamPred <- tvec^(k-1)*exp(-tvec/theta)
-  return(gamPred)
-}
-
-gamDevSq <- function(vars, tvec, obs){
-  ypred <- gamFunc(vars, tvec)
-  DevSq <- (ypred-obs)^2
-  out <- sum(DevSq)
-  return(out)
-}
+#**********************Fitted data : Gamma model********************************
 
 tvec = celldenstime$Tvec
 gamPred = celldenstime$celldens
 gamPar <- c(3,15)
 fitted<-optim(par=gamPar,fn=gamDevSq,method="Nelder-Mead", tvec=tvec, obs=gamPred)
-fitted
+#fitted
 
 k<-fitted$par[1]
 theta<-fitted$par[2]
@@ -112,6 +52,7 @@ cond<-c("Model data")
 PVAL<-data.frame(tvec,Pval,cond)
 PVAL
 
+#*************************************Plot**************************************
 a<-rep(Cond1,length(celldens))
 b<-rep(cond,length(Pval))
 
