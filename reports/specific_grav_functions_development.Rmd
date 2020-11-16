@@ -17,18 +17,18 @@ source("../src/spec_grav_function.R")
 ### Loading Brewery Data
 
 ```{r}
-fermentation_data <- read_excel("brewnalysis_test_data.xlsx") %>%
+fermentation_data <- read_excel("../data/brewnalysis_test_data.xlsx") %>%
   janitor::clean_names()
 
 beer_a_b5 <- fermentation_data %>%
-  # dplyr::filter(brand == "beer_a", batch_number == 5) %>%
+  dplyr::filter(brand == "beer_a", batch_number == 5) %>%
   select(brand, batch_number, fermentation_day, gravity, p_h)
 
-grav_plot <- ggplot(beer_a_b5, aes(x = fermentation_day, y = gravity, color = brand, shape = factor(batch_number))) +
+grav_plot <- ggplot(fermentation_data, aes(x = fermentation_day, y = gravity, color = brand, shape = factor(batch_number))) +
   geom_point() +
   geom_line()
 
-ph_plot <- ggplot(beer_a_b5, aes(x = fermentation_day, y = p_h, color = brand, shape = factor(batch_number))) +
+ph_plot <- ggplot(fermentation_data, aes(x = fermentation_day, y = p_h, color = brand, shape = factor(batch_number))) +
   geom_point() +
   geom_line()
 
@@ -40,8 +40,25 @@ ph_plot
 ### Fitting the specific gravity data to a logistic curve
 
 ```{r}
+tvec <- beer_a_b5$fermentation_day
+obs <- beer_a_b5$gravity
+log_guess <- c(1, 1, 1) 
+
+log_fit <- optim(par = log_guess, fn = log_dev_sq, method = "Nelder-Mead", tvec = tvec, obs = obs)
 
 
+tvec_max <- max(tvec)
+lineVec <- seq(1, max(tvec), by = 1) #times for plotting the predicted values
+  
+log_pred <- log_func(log_fit$par, tvec)
+
+log_fit_plot <- ggplot(beer_a_b5, aes(x = fermentation_day, y = gravity)) +
+  geom_point() +
+  geom_line() +
+  geom_point(aes(x=lineVec, y = log_pred)) +
+  geom_line(aes(x=lineVec, y = log_pred))
+
+log_fit_plot
 
 ```
 
