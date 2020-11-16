@@ -1,0 +1,10 @@
+---
+title: "reports README"
+date: "Last update `r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+---
+Here are the output reports for this project, such as HTML documents of tables or other individual analyses. The results in these reports are the pieces that will ultimately be compliled into a manuscript.
+
+This file should be updated to contain descriptions of all the files found in the "reports" directory, and knit to reflect the last time it was updated.

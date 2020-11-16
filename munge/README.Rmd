@@ -1,0 +1,10 @@
+---
+title: "munge README"
+date: "Last update `r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+---
+Here are any preprocessing or data munging code for the project. file names should begin with numbers (i.e. 01_, 02_, etc) to indicate their sequential order. The clean data that results from this code should always be saved in the cache folder.
+
+This file should stay updated to contain descriptions of all the files found in the "munge" directory, and knit to reflect the last time it was updated.
