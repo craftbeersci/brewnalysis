@@ -37,28 +37,77 @@ ph_plot
 
 ```
 
-### Fitting the specific gravity data to a logistic curve
+### Fitting the specific gravity data to a logistic vs exponential curve
 
 ```{r}
 tvec <- beer_a_b5$fermentation_day
 obs <- beer_a_b5$gravity
-log_guess <- c(1, 1, 1) 
 
+log_guess <- c(0, 50, -10) 
 log_fit <- optim(par = log_guess, fn = log_dev_sq, method = "Nelder-Mead", tvec = tvec, obs = obs)
+
+exp_guess <- c(max(obs), .5, min(obs))
+exp_fit <- optim(par = exp_guess, fn = exp_dev_sq, method = "Nelder-Mead", tvec = tvec, obs = obs)
 
 
 tvec_max <- max(tvec)
 lineVec <- seq(1, max(tvec), by = 1) #times for plotting the predicted values
   
 log_pred <- log_func(log_fit$par, tvec)
+exp_pred <- exp_func(exp_fit$par, tvec)
 
-log_fit_plot <- ggplot(beer_a_b5, aes(x = fermentation_day, y = gravity)) +
+model_fit_plot <- ggplot(beer_a_b5, aes(x = fermentation_day, y = gravity)) +
   geom_point() +
   geom_line() +
-  geom_point(aes(x=lineVec, y = log_pred)) +
-  geom_line(aes(x=lineVec, y = log_pred))
+  geom_point(aes(x=lineVec, y = log_pred), color = "orange", show.legend = TRUE) +
+  geom_line(aes(x=lineVec, y = log_pred), color = "orange") +
+  geom_point(aes(x=lineVec, y = exp_pred), color = "blue", show.legend = TRUE) +
+  geom_line(aes(x=lineVec, y = exp_pred), color = "blue") +
+  theme_classic()
 
-log_fit_plot
+model_fit_plot
+log_fit$par
+exp_fit$par
+
+
+
+
+```
+### Fitting the exponential and logistic funtion to all data
+
+```{r}
+log_summary <- function(log_guess, tvec, obs){
+  log_pars <- optim(par = log_guess, fn = log_dev_sq, method = "Nelder-Mead", tvec = tvec, obs = obs)
+  log_pars <- log_pars$par
+  return(list(log_pars))
+  # return(log_pars)
+}
+
+exp_summary <- function(exp_guess, tvec, obs){
+  exp_pars <- optim(par = exp_guess, fn = exp_dev_sq, method = "Nelder-Mead", tvec = tvec, obs = obs)
+  exp_pars <- exp_pars$par
+  return(list(exp_pars))
+  # return(exp_pars)
+  }
+
+model_fits <- fermentation_data %>%
+  group_by(brand, batch_number) %>%
+  # dplyr::filter(brand == "beer_a", batch_number == 5) %>%
+  summarize(log_pars = log_summary(log_guess, fermentation_day, gravity),
+            exp_pars = exp_summary(exp_guess, fermentation_day, gravity)) %>%
+  full_join(fermentation_data) %>%
+  mutate(log_pred = log_func(unlist(log_pars), fermentation_day)) %>%
+  mutate(exp_pred = exp_func(unlist(exp_pars), fermentation_day)) %>%
+  pivot_longer(c(gravity, log_pred, exp_pred))
+
+density_plot <- model_fits %>% 
+  ggplot(aes(x = fermentation_day, y = value, group = interaction(brand, batch_number, name), color = name)) +
+  geom_line() +
+  geom_point() +
+  theme_classic()
+
+density_plot
+density_plot + facet_grid(rows = vars(brand), cols = vars(batch_number))
 
 ```
 
