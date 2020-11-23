@@ -48,6 +48,23 @@ TvecFunc<-function(x){
   
 }
 
+
+TvecFuncATB<-function(x,y){
+  Time<-x[,5:6]
+  Time<-paste(Time$Date, format(as.POSIXct(Time$`Sample Time`), '%T'))
+  Tvec = numeric()
+  for(i in 1:(length(Time))) {
+    start<- Time [1]
+    finish<- Time[i]
+    A<-difftime(finish,start,units="hours")
+    Tvec = c(Tvec,A)
+  }
+  # print(Tvec)
+  # z<-data.frame(Tvec,y)
+  return(Tvec)
+  
+}
+
 #*******************************************************************************
 #predicted values for the gama function with an amplitude parameter.
 gamFunc <- function(gamPar, tvec){
