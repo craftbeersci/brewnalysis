@@ -11,18 +11,28 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library("readxl")
 library("ggplot2")
-library(grid)
+require(dplyr)
+library("grid")
 source("brewnalysis_functions.R")
+library(janitor)
 ```
 
 ## Loadind Data
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
 ```{r}
-data <- read_excel("brewnalysis_test_data.xlsx") 
+data <- read_excel("brewnalysis_test_data.xlsx") %>%
+  janitor::clean_names()
+
+
+beer_a_b5 <- data %>%
+  dplyr::filter(brand == "beer_a", batch_number == 5) %>%
+  select(brand, batch_number, date,sample_time,dilution_factor, cell_count_1_live_cells,cell_count_2_live_cells) %>%
+  mutate(beer_a_b5,ACPSS=cell_count_1_live_cells+cell_count_2_live_cells) %>%
+  mutate(beer_a_b5,VSS=0.2*0.2*0.1) %>%
+  mutate (beer_a_b5,cell_density=(ACPSS*dilution_factor)/VSS)
+
+
+
 
 batch1a=data[data$Brand=='beer_a'&data$`Batch Number`=='1',]
 batch2a=data[data$Brand=='beer_a'&data$`Batch Number`=='2',]
@@ -82,7 +92,7 @@ Cond5e=ConditionFunc(batch5e)
 
 ```{r}
 
-celldens1a = cellcountFunc(batch1a)
+celldens1a = cellcountFuncATB(batch1a)
 celldens2a = cellcountFunc(batch2a)
 celldens3a = cellcountFunc(batch3a)
 celldens4a = cellcountFunc(batch4a)
