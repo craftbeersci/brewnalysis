@@ -23,8 +23,17 @@ library(janitor)
 data <- read_excel("brewnalysis_test_data.xlsx") %>%
   janitor::clean_names() %>%
   group_by(brand,batch_number)%>%
-  select(brand, batch_number, date,sample_time,dilution_factor, cell_count_1_live_cells,cell_count_2_live_cells)%>%
-  summarize(celldensity=cellcountFuncATB(data),Tvec=TvecFuncATB(data))
+  select(brand, batch_number, date,sample_time,dilution_factor,cell_count_1_live_cells,cell_count_1_squares_counted,cell_count_2_live_cells,cell_count_2_squares_counted)
+
+
+data1 <- sapply(data,function(x) cellcountFuncATB(x))
+
+
+  #rowwise() %>%
+  #mutate(celldensity=cellcountFuncATB(dilution_factor,cell_count_1_live_cells,cell_count_2_live_cells))
+
+
+#,Tvec=TvecFuncATB(data))
 
 #beer_a_b5 <- data %>%
   #dplyr::filter(brand == "beer_a", batch_number == 5) %>%
