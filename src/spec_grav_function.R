@@ -13,7 +13,14 @@ log_func <- function(log_par, tvec){
 exp_func <- function(exp_par, tvec){
   n0 <- exp_par[1]
   lambda <- exp_par[2]
-  fg <- exp_par[3]
+  fg <- exp_par[3] #final gravity of fermentation
+  exp_pred <- fg + (n0 * exp(-lambda*tvec))
+}
+
+exp_func_2 <- function(exp_par, fg, tvec){
+  n0 <- exp_par[1]
+  lambda <- exp_par[2]
+  #fg is the final gravity of fermentation
   exp_pred <- fg + (n0 * exp(-lambda*tvec))
 }
 
@@ -33,4 +40,9 @@ exp_dev_sq <- function(vars, tvec, obs){
   return(out)
 }
 
-# log_fit <- optim(par = gamGuess, fn = gamDevSq, method = "Nelder-Mead", tvec = tvec, obs = obs)
+exp_dev_sq2 <- function(vars, fg, tvec, obs){
+  y_pred <- exp_func_2(vars, fg, tvec)
+  dev_sq <- (y_pred-obs)^2
+  out <- sum(dev_sq)
+  return(out)
+}
