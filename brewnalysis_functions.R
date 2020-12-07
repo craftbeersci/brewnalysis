@@ -28,30 +28,40 @@ cellcountFunc<- function(x,L=0.2,D=0.1) {
     celldensity=c((y[,1]*y[,2])/y[,3])
   return(celldensity)
 }
+#***************************CELL DENSITY ATB************************************
 
-
+cell_count_func <-function(squares_counted,cell_count,dilution,L=0.2,D=0.1){
+  volume=L*L*D
+  squares_counted=data$cell_count_1_squares_counted
+  cell_count=data$cell_count_1_live_cells
+  dilution=data$dilution_factor
+  ave_cells_sq<-((cell_count/squares_counted)*dilution)/volume
+  return(ave_cells_sq)
+}
 #*******************************************************************************
 
-TvecFunc<-function(x){
-  Time<-x[,5:6]
-  Time<-paste(Time$Date, format(as.POSIXct(Time$`Sample Time`), '%T'))
-  Tvec = numeric()
-  for(i in 1:(length(Time))) {
-    start<- Time [1]
-    finish<- Time[i]
-    A<-difftime(finish,start,units="hours")
-    Tvec = c(Tvec,A)
-  }
-  print(Tvec)
-  z<-data.frame(Tvec,celldens)
-  return(z)
+#TvecFunc<-function(x){
+ # Time<-x[,5:6]
+ # Time<-paste(Time$Date, format(as.POSIXct(Time$`Sample Time`), '%T'))
+ # Tvec = numeric()
+ # for(i in 1:(length(Time))) {
+  #  start<- Time [1]
+  #  finish<- Time[i]
+  #  A<-difftime(finish,start,units="hours")
+  #  Tvec = c(Tvec,A)
+  #}
+  #print(Tvec)
+ # z<-data.frame(Tvec,celldens)
+  #return(z)
   
-}
+#}
 
 
-TvecFuncATB<-function(x,y){
-  Time<-x[,5:6]
-  Time<-paste(Time$Date, format(as.POSIXct(Time$`Sample Time`), '%T'))
+TvecFuncATB<-function(date,sample,y){
+  date=data
+  sample=data$sample_time
+  Time<-date$sample
+  Time<-paste(Date, format(as.POSIXct(sample), '%T'))
   Tvec = numeric()
   for(i in 1:(length(Time))) {
     start<- Time [1]
@@ -59,8 +69,8 @@ TvecFuncATB<-function(x,y){
     A<-difftime(finish,start,units="hours")
     Tvec = c(Tvec,A)
   }
-  # print(Tvec)
-  # z<-data.frame(Tvec,y)
+  #print(Tvec)
+  #z<-data.frame(Tvec,y)
   return(Tvec)
   
 }

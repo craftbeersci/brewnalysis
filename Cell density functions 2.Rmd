@@ -26,24 +26,116 @@ data <- read_excel("brewnalysis_test_data.xlsx") %>%
   select(brand, batch_number, date,sample_time,dilution_factor,cell_count_1_live_cells,cell_count_1_squares_counted,cell_count_2_live_cells,cell_count_2_squares_counted)
 
 
-data1 <- sapply(data,function(x) cellcountFuncATB(x))
+```
+
+## Visualization of all the batches
+
+```{r}
+
+data1 <- sapply(data,cell_count_func)
+
+data2 <- sapply(data,TvecFuncATB)
+
+celldenstime=data.frame(data2,data1)
 
 
-  #rowwise() %>%
-  #mutate(celldensity=cellcountFuncATB(dilution_factor,cell_count_1_live_cells,cell_count_2_live_cells))
+Tvec<-c(celldenstime)
+cell.density<-c(data1)
+DataFinal<-data.frame(Tvec,cell.density)
 
 
-#,Tvec=TvecFuncATB(data))
-
-#beer_a_b5 <- data %>%
-  #dplyr::filter(brand == "beer_a", batch_number == 5) %>%
-  #select(brand, batch_number, date,sample_time,dilution_factor, cell_count_1_live_cells,cell_count_2_live_cells) %>%
-  #mutate(beer_a_b5,ACPSS=cell_count_1_live_cells+cell_count_2_live_cells) %>%
- # mutate(beer_a_b5,VSS=0.2*0.2*0.1) %>%
-  #mutate (beer_a_b5,cell_density=(ACPSS*dilution_factor)/VSS)
+plot<- ggplot(data=DataFinal,aes(x=Tvec,y=cell.density))+geom_point(aes(colour = factor(Condition)))+geom_line(aes(colour = factor(Condition)))+labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")
+plot
 
 
 
+```
+
+
+## Gamma model 
+
+
+```{r}
+
+#************************Cell density ******************************************
+#For this function, the size of the square is set a default value
+#The default value length is 0.2 and the default value for the depth is 0.1
+#To change these default value type cellcountFunc(data,L="enter the length of 
+#the square",D="Enter the depth of the square")
+
+celldens = cellcountFunc(batch2a)
+
+#************************Cell density/time**************************************
+celldenstime=TvecFunc(batch2a)
+
+#**********************Fitted data : Gamma model********************************
+
+tvec = celldenstime$Tvec
+gamPred = celldenstime$celldens
+gamPar <- c(3,15)
+fitted<-optim(par=gamPar,fn=gamDevSq,method="Nelder-Mead", tvec=tvec, obs=gamPred)
+#fitted
+
+k<-fitted$par[1]
+theta<-fitted$par[2]
+Pval<-tvec^(k-1)*exp(-tvec/theta)
+PVAL<-data.frame(tvec,Pval)
+cond<-c("Model data")
+PVAL<-data.frame(tvec,Pval,cond)
+PVAL
+
+#*************************************Plot**************************************
+a<-rep(Cond2a,length(celldens))
+b<-rep(cond,length(Pval))
+
+Tvec<-c(tvec,tvec)
+cell.density<-c(celldens,Pval)
+Condition<-c(a,b)
+DataFinal<-data.frame(Tvec,cell.density,Condition)
+DataFinal
+
+plot<- ggplot(data=DataFinal,aes(x=Tvec,y=cell.density))+geom_point(aes(colour = factor(Condition)))+geom_line(aes(colour = factor(Condition)))+labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")
+plot
+
+
+```
+
+## Gamma + model
+
+```{r}
+tvec = celldenstime$Tvec
+gamAPred = celldenstime$celldens
+gamAPar <- c(1,3,15)  #I put 1 but I didn't know what number to use
+fitted<-optim(par=gamAPar,fn=gamADevSq,method="Nelder-Mead", tvec=tvec, obs=gamAPred)
+
+k<-fitted$par[1]
+theta<-fitted$par[2]
+A<-fitted$par[3]
+Pval<- A+tvec^(k-1)*exp(-tvec/theta)
+PVAL<-data.frame(tvec,Pval)
+cond<-c("Model data")
+PVAL<-data.frame(tvec,Pval,cond)
+
+#*************************************Plot**************************************
+
+a<-rep(Cond2a,length(celldens))
+b<-rep(cond,length(Pval))
+
+Tvec<-c(tvec,tvec)
+cell.density<-c(celldens,Pval)
+Condition<-c(a,b)
+DataFinal<-data.frame(Tvec,cell.density,Condition)
+DataFinal
+
+plot<- ggplot(data=DataFinal,aes(x=Tvec,y=cell.density))+geom_point(aes(colour = factor(Condition)))+geom_line(aes(colour = factor(Condition)))+labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")
+plot
+
+
+```
+
+# Alternative "all the batches"
+
+data <- read_excel("brewnalysis_test_data.xlsx") 
 
 batch1a=data[data$Brand=='beer_a'&data$`Batch Number`=='1',]
 batch2a=data[data$Brand=='beer_a'&data$`Batch Number`=='2',]
@@ -99,11 +191,11 @@ Cond5e=ConditionFunc(batch5e)
 
 ```
 
-## Visualization of all the batches
+# Alternative Visualization of all the batches
 
 ```{r}
 
-celldens1a = cellcountFuncATB(batch1a)
+celldens1a = cellcountFunc(batch1a)
 celldens2a = cellcountFunc(batch2a)
 celldens3a = cellcountFunc(batch3a)
 celldens4a = cellcountFunc(batch4a)
@@ -190,89 +282,3 @@ DataFinal
 
 plot<- ggplot(data=DataFinal,aes(x=Tvec,y=cell.density))+geom_point(aes(colour = factor(Condition)))+geom_line(aes(colour = factor(Condition)))+labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")
 plot
-
-```
-
-
-## Gamma model 
-
-
-```{r}
-
-#************************Cell density ******************************************
-#For this function, the size of the square is set a default value
-#The default value length is 0.2 and the default value for the depth is 0.1
-#To change these default value type cellcountFunc(data,L="enter the length of 
-#the square",D="Enter the depth of the square")
-
-celldens = cellcountFunc(batch2a)
-
-#************************Cell density/time**************************************
-celldenstime=TvecFunc(batch2a)
-
-#**********************Fitted data : Gamma model********************************
-
-tvec = celldenstime$Tvec
-gamPred = celldenstime$celldens
-gamPar <- c(3,15)
-fitted<-optim(par=gamPar,fn=gamDevSq,method="Nelder-Mead", tvec=tvec, obs=gamPred)
-#fitted
-
-k<-fitted$par[1]
-theta<-fitted$par[2]
-Pval<-tvec^(k-1)*exp(-tvec/theta)
-PVAL<-data.frame(tvec,Pval)
-cond<-c("Model data")
-PVAL<-data.frame(tvec,Pval,cond)
-PVAL
-
-#*************************************Plot**************************************
-a<-rep(Cond2a,length(celldens))
-b<-rep(cond,length(Pval))
-
-Tvec<-c(tvec,tvec)
-cell.density<-c(celldens,Pval)
-Condition<-c(a,b)
-DataFinal<-data.frame(Tvec,cell.density,Condition)
-DataFinal
-
-plot<- ggplot(data=DataFinal,aes(x=Tvec,y=cell.density))+geom_point(aes(colour = factor(Condition)))+geom_line(aes(colour = factor(Condition)))+labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")
-plot
-
-
-```
-
-## Gamma + model
-
-```{r}
-tvec = celldenstime$Tvec
-gamAPred = celldenstime$celldens
-gamAPar <- c(1,3,15)  #I put 1 but I didn't know what number to use
-fitted<-optim(par=gamAPar,fn=gamADevSq,method="Nelder-Mead", tvec=tvec, obs=gamAPred)
-
-k<-fitted$par[1]
-theta<-fitted$par[2]
-A<-fitted$par[3]
-Pval<- A+tvec^(k-1)*exp(-tvec/theta)
-PVAL<-data.frame(tvec,Pval)
-cond<-c("Model data")
-PVAL<-data.frame(tvec,Pval,cond)
-
-#*************************************Plot**************************************
-
-a<-rep(Cond2a,length(celldens))
-b<-rep(cond,length(Pval))
-
-Tvec<-c(tvec,tvec)
-cell.density<-c(celldens,Pval)
-Condition<-c(a,b)
-DataFinal<-data.frame(Tvec,cell.density,Condition)
-DataFinal
-
-plot<- ggplot(data=DataFinal,aes(x=Tvec,y=cell.density))+geom_point(aes(colour = factor(Condition)))+geom_line(aes(colour = factor(Condition)))+labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")
-plot
-
-
-```
-
-
