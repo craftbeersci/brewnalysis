@@ -1,0 +1,30 @@
+---
+title: "Project Title"
+subtitle: "To Do"
+date: "Last update `r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+---
+## TODO  
+
+## Standard format  
+
+### Task name  
+
+**Openened:** 2019-11-07 
+
+**notes:**  
+
+**Progress updates:**  
+
+- 2019-11-07  
+  - did dis  
+  - and dis
+- 2019-11-08  
+  - did dat  
+  - and dat  
+  
+**Completion note:**  
+
+**Closed:** 2019-11-08

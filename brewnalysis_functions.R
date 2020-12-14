@@ -32,9 +32,9 @@ cellcountFunc<- function(x,L=0.2,D=0.1) {
 
 cell_count_func <-function(squares_counted,cell_count,dilution,L=0.2,D=0.1){
   volume=L*L*D
-  squares_counted=data$cell_count_1_squares_counted
-  cell_count=data$cell_count_1_live_cells
-  dilution=data$dilution_factor
+  #squares_counted=data$cell_count_1_squares_counted
+  #cell_count=data$cell_count_1_live_cells
+  #dilution=data$dilution_factor
   ave_cells_sq<-((cell_count/squares_counted)*dilution)/volume
   return(ave_cells_sq)
 }
@@ -57,11 +57,11 @@ cell_count_func <-function(squares_counted,cell_count,dilution,L=0.2,D=0.1){
 #}
 
 
-TvecFuncATB<-function(date,sample,y){
-  date=data
+TvecFuncATB<-function(data,date,sample,y){
+  date=data$date
   sample=data$sample_time
   Time<-date$sample
-  Time<-paste(Date, format(as.POSIXct(sample), '%T'))
+  Time<-paste(date, format(as.POSIXct(sample), '%T'))
   Tvec = numeric()
   for(i in 1:(length(Time))) {
     start<- Time [1]

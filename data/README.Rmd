@@ -1,0 +1,11 @@
+---
+title: "data README"
+date: "Last update `r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+---
+Here is where the raw data for this project is stored. This data is cleaned via the code in the "munge" folder, and the clean data is stored in the cache folder for further analysis.
+
+This file should stay updated to contain descriptions of all the files found in the "data" directory, and knit to reflect the last time it was updated.
+

@@ -1,0 +1,10 @@
+---
+title: "figures README"
+date: "Last update `r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+---
+Here are where all saved figures are stored. File names should not be edited here, they should be edited in the save function in the report that generated them
+
+This file should stay updated to contain descriptions of all the files found in the "figures" directory, and knit to reflect the last time it was updated.

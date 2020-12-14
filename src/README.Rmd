@@ -1,0 +1,10 @@
+---
+title: "src README"
+date: "Last update `r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+---
+This directory holds all of the final statistical analysis scripts for this project. 
+
+This file should be updated to contain descriptions of all the files found in the "src" directory, and knit to reflect the last time it was updated.

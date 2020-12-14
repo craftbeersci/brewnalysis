@@ -20,7 +20,7 @@ library(janitor)
 ## Loadind Data
 
 ```{r}
-data <- read_excel("brewnalysis_test_data.xlsx") %>%
+data <- read_excel("data/brewnalysis_test_data.xlsx") %>%
   janitor::clean_names() %>%
   group_by(brand,batch_number)%>%
   select(brand, batch_number, date,sample_time,dilution_factor,cell_count_1_live_cells,cell_count_1_squares_counted,cell_count_2_live_cells,cell_count_2_squares_counted)
@@ -32,19 +32,19 @@ data <- read_excel("brewnalysis_test_data.xlsx") %>%
 
 ```{r}
 
-data1 <- sapply(data,cell_count_func)
+data1 <- sapply(data,cell_count_func,cell_count_1_squares_counted,cell_count_1_live_cells,dilution_factor)
 
-data2 <- sapply(data,TvecFuncATB)
+#data2 <- sapply(data,TvecFuncATB)
 
-celldenstime=data.frame(data2,data1)
-
-
-Tvec<-c(celldenstime)
-cell.density<-c(data1)
-DataFinal<-data.frame(Tvec,cell.density)
+#celldenstime=data.frame(data2,data1)
 
 
-plot<- ggplot(data=DataFinal,aes(x=Tvec,y=cell.density))+geom_point(aes(colour = factor(Condition)))+geom_line(aes(colour = factor(Condition)))+labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")
+#Tvec<-c(celldenstime)
+#cell.density<-c(data1)
+#DataFinal<-data.frame(Tvec,cell.density)
+
+
+plot<- ggplot(data=data1,aes(x=Tvec,y=cell.density))+geom_point(aes(colour = factor(Condition)))+geom_line(aes(colour = factor(Condition)))+labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")
 plot
 
 

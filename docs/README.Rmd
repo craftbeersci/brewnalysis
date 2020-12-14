@@ -1,0 +1,11 @@
+---
+title: "docs README"
+date: "Last update `r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+---
+Here is where the manuscript for this project is stored and edited
+
+This file should stay updated to contain descriptions of all the files found in the "docs" directory, and knit to reflect the last time it was updated.
+
