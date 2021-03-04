@@ -1,13 +1,15 @@
 ---
 title: "Using statistical models of fermentation characteristics as a quality control metric for commercial fermentations."
 author: 
-  - Arthur Rudolph^[First Magnitude Brewery]
+  - Arthur Rudolph, First Magnitude Brewery
   - Bertille Smith
-  - Patrick Soucy^[First Magnitude Brewery]
-  - Sam Swartz^[Coppertail Brewery]
-  - Jarrod Lindenmuth^[Cigar City Brewery]
+  - Patrick Soucy, First Magnitude Brewery
+  - Sam Swartz, Coppertail Brewery
+  - Jarrod Lindenmuth, Cigar City Brewery
 date: "Created: 3/4/2021  \n  \nLast update: `r format(Sys.time(), '%m/%d/%Y')`"
-output: word_document
+output:
+  word_document:
+      reference_docx: docx_template.docx
 ---
 
 ```{r setup, include=FALSE}
@@ -16,15 +18,23 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Abstract
 
+========================
+
 # Introduction
+
 The dynamics of yeast populations during brewery fermentations are important in determining the quality of the final product. Many environmental aspects (temperature, specific gravity, pH, etc.) as well as demographic factors (yeast pitching rate, age, health, etc.) and genetics (yeast strain, flocculin mutations) can impact the population dynamics of yeast, ultimately impacting the flavor of the beer. As a result, maintaining consistent conditions that result in consistent yeast population dynamics will result in consistent product quality. A lot of effort from the QAQC program goes into ensuring that these consistent conditions are well maintained in the hopes of keeping the fermentation remains consistent. However, there are not really any good analytical tools available to determine how successful these attempts are at maintaining consistent yeast population dynamics. Developing such a tool is the goal of this project.
 Yeast populations grow logistically during fermentation, reaching a plateau in population growth once they have depleted available resources. Typically, the total population size would be inferred from determining the density of cells in suspension, however, in commercial brewery fermentations, there is a second process at play, flocculation, that also influences population dynamics. Flocculation is the process by which yeast cells (aided via cell surface adhesin proteins) clump together forming flocs which rapidly precipitate out of solution. This results in the observed pattern of cells in suspension not resembling logistic growth, but rather some form of hump shaped population curve. 
 Previous work described the shape of that curve using a variety of models (with good success, see the attached paper if interested), but that was limited to data collected from a laboratory setting, in which there were tightly controlled conditions, and very frequent sampling. From that data, I simulated “brewery” data sets with fewer data points that would be more typical in a commercial data set, but this approach is likely of limited applicability. For example, difficulties in getting accurate cell counts, either due to issues with sampling from the tanks (due to extra yeast clumps aggregating around sample valves), or in the counting method used could result in significant irregularities in the results. Additionally, none of the now common brewing practices and process aids (like dry hopping, cold crashing, filtering, centrifuging, etc.) were included or considered. 
+========================
 
 # Methods
+
 # Sample collection
+
 # Specific gravity & pH measurement
+
 # Cell counting
 
 # Results
+
 # Discussion
