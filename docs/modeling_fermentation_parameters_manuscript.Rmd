@@ -7,7 +7,7 @@ author:
   - Sam Swartz^[Coppertail Brewery]
   - Jarrod Lindenmuth^[Cigar City Brewery]
 date: "Created: 3/4/2021  \n  \nLast update: `r format(Sys.time(), '%m/%d/%Y')`"
-output: html_document
+output: word_document
 ---
 
 ```{r setup, include=FALSE}
