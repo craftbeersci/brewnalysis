@@ -50,7 +50,7 @@ exp_guess <- c(max(obs), .5, min(obs))
 exp_fit <- optim(par = exp_guess, fn = exp_dev_sq, method = "Nelder-Mead", tvec = tvec, obs = obs)
 
 exp_guess <- c(max(obs), .5, min(obs))
-exp_fit2 <- optim(par = exp_guess[1:2], fn = exp_dev_sq2, method = "Nelder-Mead", fg = min(obs), tvec = tvec, obs = obs)
+exp_fit2 <- optim(par = exp_guess, fn = exp_dev_sq2, method = "Nelder-Mead", fg = min(obs), tvec = tvec, obs = obs)
 
 tvec_max <- max(tvec)
 lineVec <- seq(1, max(tvec), by = 1) #times for plotting the predicted values
@@ -96,7 +96,7 @@ exp_summary <- function(exp_guess, tvec, obs){
 }
 
 exp_summary_2 <- function(exp_guess, tvec, obs){
-  exp_pars <- optim(par = exp_guess[1:2], fn = exp_dev_sq2, method = "Nelder-Mead", fg = min(obs), tvec = tvec, obs = obs)
+  exp_pars <- optim(par = exp_guess, fn = exp_dev_sq2, method = "Nelder-Mead", fg = min(obs), tvec = tvec, obs = obs)
   exp_pars <- exp_pars$par
   return(list(c(exp_pars, min(obs))))
   # return(exp_pars)
@@ -112,10 +112,10 @@ model_fits <- fermentation_data %>%
   mutate(log_pred = log_func(unlist(log_pars), fermentation_day)) %>%
   mutate(exp_pred = exp_func(unlist(exp_pars), fermentation_day)) %>%
   mutate(exp_pred_2 = exp_func(unlist(exp_pars2), fermentation_day)) %>%
-  pivot_longer(c(gravity, log_pred, exp_pred, exp_pred_2))
+  pivot_longer(c(gravity, log_pred, exp_pred, exp_pred_2), names_to = "model_id", values_to = "specific_gravity")
 
 density_plot <- model_fits %>% 
-  ggplot(aes(x = fermentation_day, y = value, group = interaction(brand, batch_number, name), color = name)) +
+  ggplot(aes(x = fermentation_day, y = specific_gravity, group = interaction(brand, batch_number, model_id), color = model_id)) +
   geom_line() +
   geom_point() +
   theme_classic()

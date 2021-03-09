@@ -14,7 +14,7 @@ exp_func <- function(exp_par, tvec){
   n0 <- exp_par[1]
   lambda <- exp_par[2]
   fg <- exp_par[3] #final gravity of fermentation
-  exp_pred <- fg + (n0 * exp(-lambda*tvec))
+  exp_pred <- n0 * exp(-lambda*tvec)
 }
 
 exp_func_2 <- function(exp_par, fg, tvec){
