@@ -3,7 +3,6 @@
 
 ###################
 ########## Specific Gravity Functions
-
 #####
 # predicted value for the log function from equation 1 in Reid et al. 2021
 log_func <- function(log_par, tvec){
@@ -13,7 +12,6 @@ log_func <- function(log_par, tvec){
   b <- log_par[4] # rate of decrease at inflection point (max rate of decrease)
   log_pred <- pe + (pi-pe)/(1+exp(-b(tvec-m)))
 }
-
 #####
 # predicted value for the generalized logistic function (eq. 2 in Reid et al. 2021)
 gen_log_func <- lfunction(gen_log_par, tvec){
@@ -25,7 +23,6 @@ gen_log_func <- lfunction(gen_log_par, tvec){
   gen_log_pred <- pe + (pi-pe)/((1+s*exp(-b(tvec-m)))^(1/s))
   # TODO check out this s parameter, I don't know if it's actually multiplied or what?
 }
-
 #####
 # predicted values for the exponential (decay) function
 exp_func <- function(exp_par, tvec){
