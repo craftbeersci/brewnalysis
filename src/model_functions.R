@@ -35,11 +35,6 @@ exp_func <- function(exp_par, tvec){
   exp_pred <- fg + (n0 * exp(-lambda*tvec))
 }
 
-
-
-
-
-
 ###################
 # Functions for pH
 

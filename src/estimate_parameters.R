@@ -30,15 +30,6 @@ est_exp_pars <- function(exp_guess, tvec, obs){
   # return(exp_pars)
 }
 
-
-
-
-
-
-
-
-
-
 ###################
 # Functions for pH
 
