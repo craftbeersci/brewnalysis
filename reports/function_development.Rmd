@@ -58,9 +58,9 @@ model_fits <- fermentation_data %>%
             exp_pars = est_exp_pars(exp_guess, fermentation_day, gravity)) %>%
   left_join(fermentation_data) %>%
   rowwise() %>%
-  mutate(log_pred = log_func(unlist(log_pars), fermentation_day)) %>%
-  mutate(gen_log_pred = gen_log_func(unlist(gen_log_pars), fermentation_day)) %>%
-  mutate(exp_pred = exp_func(unlist(exp_pars), fermentation_day)) %>%
+  mutate(log_pred = log_func(unlist(log_pars[1:4]), fermentation_day)) %>%
+  mutate(gen_log_pred = gen_log_func(unlist(gen_log_pars[1:5]), fermentation_day)) %>%
+  mutate(exp_pred = exp_func(unlist(exp_pars[1:3]), fermentation_day)) %>%
   dplyr::select(brand, batch_number, fermentation_day, log_pred, gen_log_pred, exp_pred, gravity) %>%
   pivot_longer(c(gravity, log_pred, gen_log_pred,exp_pred), names_to = "model_id", values_to = "specific_gravity")
 
@@ -80,6 +80,34 @@ all_density_plots <- model_fits %>%
 single_density_plot
 all_density_plots + facet_grid(rows = vars(brand), cols = vars(batch_number))
 ggsave("../figures/gravity_fits.png", width = 12, height = 12, dpi = 300)
+
+```
+
+```{r AICc_calculations}
+
+  
+  #calculate AIC values for all 5 model fits
+  gamAIC <- 2*length(gamGuess) + N*log(gamFit$value/N)
+  gamAAIC <- 2*length(gamAGuess) + N*log(gamAFit$value/N)
+  normAIC <- 2*length(normGuess) + N*log(normFit$value/N) 
+  tiltAIC <- 2*length(tiltGuess) + N*log(tiltFit$value/N)
+  macAIC <- 2*length(macGuess) + N*log(macFit$value/N)
+
+  
+  #This calculates the correction value AICc
+  gamAICc <- gamAIC + ((2*length(gamGuess)^2) + 2*length(gamGuess))/(N-length(gamGuess)-1)
+  gamAAICc <- gamAAIC + ((2*length(gamAGuess)^2) + 2*length(gamAGuess))/(N-length(gamAGuess)-1)
+  normAICc <- normAIC + ((2*length(normGuess)^2) + 2*length(normGuess))/(N-length(normGuess)-1)
+  tiltAICc <- tiltAIC + ((2*length(tiltGuess)^2) + 2*length(tiltGuess))/(N-length(tiltGuess)-1)
+  macAICc <- macAIC + ((2*length(macGuess)^2) + 2*length(macGuess))/(N-length(macGuess)-1)
+  
+  
+  aiccList <- c(gamAICc,gamAAICc,normAICc,tiltAICc,macAICc) #make list of the AIC values to return
+  deltAICc <- aiccList - min(aiccList) #calculate delta aic values to return
+  results <- list(aiccList, deltAICc, gamFit, gamAFit, normFit, tiltFit, macFit, tvec, obs)
+  names(results) <- c("AICc", "deltAICc", "gam", "gamA", "norm", "tilt", "mac", "tvec", "obs")
+  return(results)  #sptit out the optim results, aic, and delta aic values.
+}
 
 ```
 
