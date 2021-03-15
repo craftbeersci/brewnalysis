@@ -8,27 +8,24 @@
 # RSS calculation for the log function from equation 1 in Reid et al. 2021
 log_rss <- function(vars, tvec, obs){
   y_pred <- log_func(vars, tvec)
-  dev_sq <- (y_pred-obs)^2
-  out <- sum(dev_sq)
-  return(out)
+  log_rss <- sum((y_pred-obs)^2)
+  return(log_rss)
 }
 
 #####
 # RSS calculation for the generalized logistic function (eq. 2 in Reid et al. 2021)
 gen_log_rss <- function(vars, tvec, obs){
   y_pred <- gen_log_func(vars, tvec)
-  dev_sq <- (y_pred-obs)^2
-  out <- sum(dev_sq)
-  return(out)
+  gen_log_rss <- sum((y_pred-obs)^2)
+  return(gen_log_rss)
 }
 
 #####
 # RSS calculation for the exponential (decay) function
 exp_rss <- function(vars, tvec, obs){
   y_pred <- exp_func(vars, tvec)
-  dev_sq <- (y_pred-obs)^2
-  out <- sum(dev_sq)
-  return(out)
+  exp_rss <- sum((y_pred-obs)^2)
+  return(exp_rss)
 }
 
 
@@ -47,19 +44,17 @@ exp_rss <- function(vars, tvec, obs){
 # Function for cells in suspension
 
 #gama
-gamDevSq <- function(vars, tvec, obs){
-  ypred <- gamFunc(vars, tvec)
-  DevSq <- (ypred-obs)^2
-  out <- sum(DevSq)
-  return(out)
+gam_rss <- function(vars, tvec, obs){
+  y_pred <- gam_func(vars, tvec)
+  gam_rss <- sum((y_pred-obs)^2)
+  return(gam_rss)
 }
 
 #gam +
-gamADevSq <- function(vars, tvec, obs){
+gam_a_rss <- function(vars, tvec, obs){
   ypred <- gamAFunc(vars, tvec)
-  DevSq <- (ypred-obs)^2
-  out <- sum(DevSq)
-  return(out)
+  gam_a_rss <- sum((ypred-obs)^2)
+  return(gam_a_rss)
 }
 
 
