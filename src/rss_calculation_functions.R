@@ -45,3 +45,21 @@ exp_rss <- function(vars, tvec, obs){
 
 ###################
 # Function for cells in suspension
+
+#gama
+gamDevSq <- function(vars, tvec, obs){
+  ypred <- gamFunc(vars, tvec)
+  DevSq <- (ypred-obs)^2
+  out <- sum(DevSq)
+  return(out)
+}
+
+#gam +
+gamADevSq <- function(vars, tvec, obs){
+  ypred <- gamAFunc(vars, tvec)
+  DevSq <- (ypred-obs)^2
+  out <- sum(DevSq)
+  return(out)
+}
+
+
