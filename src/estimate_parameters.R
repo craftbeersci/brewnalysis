@@ -38,13 +38,18 @@ est_exp_pars <- function(exp_guess, tvec, obs){
 # Function for cells in suspension
 
 #gama
-tvec = cell_density$Tvec
-gamPred = cell_density$celldensity
-gamPar <- c(3,15)
-fitted<-optim(par=gamPar,fn=gamDevSq,method="Nelder-Mead", tvec=tvec, obs=gamPred)
+est_gam_pars <- function(gam_guess, tvec, obs){
+  gam_fit <- optim(par = gam_guess, fn = gam_rss, method = "Nelder-Mead", tvec = tvec, obs = obs)
+  gam_pars <- c(gam_fit$par, gam_fit$value)
+  return(list(gam_pars))
+}
+
 
 #gama+
-tvec_plus = cell_density$Tvec
-gamAPred = cell_density$celldensity
-gamAPar <- c(1,3,15)
-fittedA<-optim(par=gamAPar,fn=gamADevSq,method="Nelder-Mead", tvec=tvec, obs=gamAPred)
+est_gam_a_pars <- function(gam_a_guess, tvec, obs){
+  gam_a_fit <- optim(par = gam_a_guess, fn = gam_a_rss , method = "Nelder-Mead", tvec = tvec, obs = obs)
+  gam_a_pars <- c(gam_a_fit$par, gam_a_fit$value)
+  return(list(gam_a_pars))
+}
+
+
