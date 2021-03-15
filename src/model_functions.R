@@ -46,18 +46,19 @@ exp_func <- function(exp_par, tvec){
 # Function for cells in suspension
 
 #gama
-gamFunc <- function(gamPar, tvec){
-  k <- gamPar[1]
-  theta <- gamPar[2]
-  gamPred <- tvec^(k-1)*exp(-tvec/theta)
-  return(gamPred)
+gam_func <- function(gam_par, tvec){
+  k <- gam_par[1]
+  theta <- gam_par[2]
+  gam_pred <- tvec^(k-1)*exp(-tvec/theta)
+  return(gam_pred)
 }
 
 
 #gama+
-gamAFunc <- function(gamAPar, tvec){
-  A <- gamAPar[1]
-  k <- gamAPar[2]
-  theta <- gamAPar[3]
-  gamAPred <- A+tvec^(k-1)*exp(-tvec/theta)
+gam_a_func <- function(gam_a_par, tvec){
+  a <- gam_a_par[1]
+  k <- gam_a_par[2]
+  theta <- gama_a_par[3]
+  gam_a_pred <- a+tvec^(k-1)*exp(-tvec/theta)
+  return(gam_a_pred)
 }
