@@ -1,0 +1,157 @@
+---
+title: "Developing specific gravity modeling functions"
+author: "Arthur Rudolph"
+date: "Created Last update `r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readxl)
+
+source("../src/model_functions.R")
+source("../src/rss_calculation_functions.R")
+source("../src/estimate_parameters.R")
+```
+
+### Loading Brewery Data
+
+```{r}
+fermentation_data <- read_excel("../data/brewnalysis_test_data.xlsx") %>%
+  janitor::clean_names()
+
+grav_plot <- ggplot(fermentation_data, aes(x = fermentation_day, y = gravity, group = interaction(brand, batch_number), color = brand)) +
+  geom_point() +
+  geom_line() +
+  theme_classic()
+
+ph_plot <- ggplot(fermentation_data, aes(x = fermentation_day, y = p_h, group = interaction(brand, batch_number), color = brand)) +
+  geom_point() +
+  geom_line() +
+  theme_classic()
+
+grav_plot
+ph_plot
+
+```
+
+### Fitting the specific gravity data to a logistic vs exponential curve
+
+```{r}
+# tvec <- beer_a_b5$fermentation_day
+# obs <- beer_a_b5$gravity
+
+log_guess <- c(3, 15, 0, -2) 
+gen_log_guess <- c(3, 15, 0, -2, 1) 
+exp_guess <- c(10, .5, 3)
+  
+```
+### Fitting the exponential and logistic funtion to all data
+
+```{r}
+model_fits <- fermentation_data %>%
+  group_by(brand, batch_number) %>%
+  summarize(log_pars = est_log_pars(log_guess, fermentation_day, gravity),
+            gen_log_pars = est_gen_log_pars(gen_log_guess, fermentation_day, gravity),
+            exp_pars = est_exp_pars(exp_guess, fermentation_day, gravity),
+            samp_count = n())
+
+
+plot_data <- model_fits %>%
+  left_join(fermentation_data) %>%
+  rowwise() %>%
+  mutate(log_pred = log_func(unlist(log_pars[1:4]), fermentation_day)) %>%
+  mutate(gen_log_pred = gen_log_func(unlist(gen_log_pars[1:5]), fermentation_day)) %>%
+  mutate(exp_pred = exp_func(unlist(exp_pars[1:3]), fermentation_day)) %>%
+  dplyr::select(brand, batch_number, fermentation_day, log_pred, gen_log_pred, exp_pred, gravity, log_pars, gen_log_pars, exp_pars) %>%
+  pivot_longer(c(gravity, log_pred, gen_log_pred,exp_pred), names_to = "model_id", values_to = "specific_gravity")
+
+single_density_plot <- plot_data %>% 
+  dplyr::filter(brand == "beer_d", batch_number == 2) %>%
+  ggplot(aes(x = fermentation_day, y = specific_gravity, group = interaction(brand, batch_number, model_id), color = model_id)) +
+  geom_line() +
+  geom_point() +
+  theme_classic()
+
+all_density_plots <- plot_data %>% 
+  ggplot(aes(x = fermentation_day, y = specific_gravity, group = interaction(brand, batch_number, model_id), color = model_id)) +
+  geom_line() +
+  geom_point() +
+  theme_classic()
+
+single_density_plot
+all_density_plots + facet_grid(rows = vars(brand), cols = vars(batch_number))
+ggsave("../figures/gravity_fits.png", width = 12, height = 12, dpi = 300)
+
+```
+
+```{r AICc_calculations}
+
+  
+  #calculate AIC values for all models
+aic_func <- function(npar, nsamp, rss){
+  aic_val <- 2*npar + nsamp*log(rss/nsamp)
+  return(aic_val)
+}  
+
+aicc_func <- function(npar, nsamp, aic_val){
+  if (nsamp <= npar+1){
+    aicc_val <- NA
+  return(aicc_val)
+  } else{
+    aicc_val <- aic_val + ((2*npar^2) + 2*npar)/(nsamp - npar - 1)
+  }
+  return(aicc_val)
+}
+
+delta_aicc_func <- function(min_aicc, aicc_val){
+  delta_aicc <- aicc_val - min_aicc
+  return(delta_aicc)
+}
+
+rmse_func <- function(obs, pred){
+  rmse_val <- sqrt(mean((obs-pred)^2))
+  return(rmse_val)
+}
+
+model_aic_values <- model_fits %>%
+  rowwise %>%
+  mutate(log_aic = aic_func(4, samp_count, log_pars[5]),
+         gen_log_aic = aic_func(5, samp_count, gen_log_pars[6]),
+         exp_aic = aic_func(3, samp_count, exp_pars[4])) %>%
+  mutate(log_aicc = aicc_func(4, samp_count, log_aic),
+         gen_aicc = aicc_func(5, samp_count, gen_log_aic),
+         exp_aicc = aicc_func(3, samp_count, exp_aic)) %>%
+  rowwise %>%
+  mutate(aicc_min = min(log_aicc, gen_aicc, exp_aicc, na.rm = TRUE)) %>%
+  mutate(log_delt_aicc = log_aicc - aicc_min,
+         gen_delt_aicc = gen_aicc - aicc_min,
+         exp_delt_aicc = exp_aicc - aicc_min)
+
+
+log_aic <- 2*4 + N*log(gamFit$value/N)
+
+
+  gen_log_aic <- 2*5 + N*log(gamAFit$value/N)
+  exp_aic <- 2*3 + N*log(normFit$value/N) 
+
+  
+  #This calculates the correction value AICc
+  gamAICc <- gamAIC + ((2*length(gamGuess)^2) + 2*length(gamGuess))/(N-length(gamGuess)-1)
+  gamAAICc <- gamAAIC + ((2*length(gamAGuess)^2) + 2*length(gamAGuess))/(N-length(gamAGuess)-1)
+  normAICc <- normAIC + ((2*length(normGuess)^2) + 2*length(normGuess))/(N-length(normGuess)-1)
+  tiltAICc <- tiltAIC + ((2*length(tiltGuess)^2) + 2*length(tiltGuess))/(N-length(tiltGuess)-1)
+  macAICc <- macAIC + ((2*length(macGuess)^2) + 2*length(macGuess))/(N-length(macGuess)-1)
+  
+  
+  aiccList <- c(gamAICc,gamAAICc,normAICc,tiltAICc,macAICc) #make list of the AIC values to return
+  deltAICc <- aiccList - min(aiccList) #calculate delta aic values to return
+  results <- list(aiccList, deltAICc, gamFit, gamAFit, normFit, tiltFit, macFit, tvec, obs)
+  names(results) <- c("AICc", "deltAICc", "gam", "gamA", "norm", "tilt", "mac", "tvec", "obs")
+  return(results)  #sptit out the optim results, aic, and delta aic values.
+
+
+```
+
