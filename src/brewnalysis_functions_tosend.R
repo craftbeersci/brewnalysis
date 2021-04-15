@@ -37,6 +37,8 @@ TvecFunc<-function(ferment_data){
 }  
 
 
+
+
 Cell_dens_func = function(ferment_data, L=.2,D=.1) {
   celldensity = cell_count_func(ferment_data, L, D)
   tvec = TvecFunc(ferment_data)
