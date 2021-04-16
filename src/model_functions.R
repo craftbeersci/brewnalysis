@@ -58,7 +58,7 @@ gam_func <- function(gam_par, tvec){
 gam_a_func <- function(gam_a_par, tvec){
   a <- gam_a_par[1]
   k <- gam_a_par[2]
-  theta <- gama_a_par[3]
+  theta <- gam_a_par[3]
   gam_a_pred <- a+tvec^(k-1)*exp(-tvec/theta)
   return(gam_a_pred)
 }

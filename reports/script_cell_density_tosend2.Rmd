@@ -7,8 +7,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-require(dplyr)
-install.packages("tidyverse")
 
 library("readxl")
 library("ggplot2")
@@ -28,15 +26,15 @@ source("../src/estimate_parameters.R")
 ```{r}
 fermentation_data <- read_excel("~/brewnalysis/brewnalysis/data/brewnalysis_test_data.xlsx") %>%
   janitor::clean_names() %>% na.omit() %>%
-  dplyr::select(brand, batch_number,date,sample_time,dilution_factor,cell_count_1_live_cells,cell_count_1_squares_counted,cell_count_2_live_cells,cell_count_2_squares_counted,fermentation_day)
+  dplyr::select(brand, batch_number,date,sample_time,dilution_factor,cell_count_1_live_cells,cell_count_1_squares_counted,cell_count_2_live_cells,cell_count_2_squares_counted)
 
 cell_density=fermentation_data %>% 
   group_by(brand,batch_number) %>% 
   group_map(~ Cell_dens_func(.x))
 
   cell_density=bind_rows(cell_density)
-
-cell_density=data.frame('brand' = fermentation_data$brand, 'batch_number' = fermentation_data$batch_number,'fermentation_day'= fermentation_data$fermentation_day,cell_density)
+  
+cell_density=data.frame(cell_density,'brand' = fermentation_data$brand, 'batch_number' = fermentation_data$batch_number)
 
 cell_dens_plot <- ggplot(cell_density, aes(x = Tvec, y = celldensity, group = interaction(brand, batch_number), color = brand)) +
   geom_point() +
@@ -46,27 +44,23 @@ cell_dens_plot <- ggplot(cell_density, aes(x = Tvec, y = celldensity, group = in
 
 # Loading Brewery Data : Single Batch
 
-beer_a_b5 <- fermentation_data %>%
+single_batch <- fermentation_data %>%
   dplyr::filter(brand == "beer_a", batch_number == 5)
 
+single_cell_density=Cell_dens_func(single_batch)
 
-
-single_cell_density=Cell_dens_func(beer_a_b5)
-single_cell_density=data.frame(single_cell_density,'brand' = beer_a_b5$brand, 'batch_number' = beer_a_b5$batch_number)
-
-
-single_cell_dens_plot <-ggplot(single_cell_density, aes(x = Tvec, y = celldensity, group = interaction(brand, batch_number), color = brand)) +
+single_cell_density=data.frame(single_cell_density,'brand' = single_batch$brand, 'batch_number' = single_batch$batch_number)
+single_cell_dens_plot <-ggplot(single_cell_density, aes(x = Tvec, y = celldensity, group = interaction(brand, batch_number), color = brand,batch_number)) +
   geom_point() +
   geom_line() +
   labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")+
   theme_classic()
 
-#Plots
 
+#Plots
 cell_dens_plot
 single_cell_dens_plot
 
-#note : problem beer_c : I checked in the initial data and they made a mistake when they recorded the date (E69) : should we change it for 4/17/20 or delete this row ?
 ```
 
 ## ## Fitting the gamma model 
@@ -74,7 +68,7 @@ single_cell_dens_plot
 ```{r}
 gam_guess <- c(3,15)
 
-tvec = cell_density$fermentation_day
+tvec = cell_density$Tvec
 Obs = cell_density$celldensity
 
 gam_fits <- cell_density %>%
@@ -84,43 +78,36 @@ gam_fits <- cell_density %>%
 
 gam_pars=est_gam_pars(gam_guess,tvec,Obs) 
 
-
 gam_pred=gam_func(unlist(gam_pars),tvec)
 
+#gamma model
+Condition_m<-c("Gamma model data")
+Condition_e<-c("Empirical data")
 
+cell_density_gamma<-data.frame('Tvec'=tvec,'celldensity'=gam_pred,'brand'=cell_density$brand,'batch_number'=cell_density$batch_number,'Condition'=Condition_m)
 
-#Condition of the data in the plot
-Condition<-c("Gamma model data")
-PVAL<-data.frame(tvec,gam_pred,Condition)
+cell_density_empirical=data.frame(cell_density,'Condition'= Condition_e)
 
-beer_a_b5$Condition_sample <-paste(beer_a_b5$brand,beer_a_b5$batch_number,sep="_b")
+cell_density_gamma_model=bind_rows(cell_density_gamma,cell_density_empirical)
 
-cell_density_gamma<-data.frame('Cell_density'=single_cell_density$cell_density,'Condition_sample'=single_cell_density$Condition_sample, 'Tvec'=single_cell_density$Tvec )%>%
-  select(Tvec, celldensity,Condition_sample)
-
-
-Sample_condition=c(cell_density_gamma$Condition_sample,PVAL$Condition)
-cell_density_gamma_model=data.frame(cell_density_gamma,PVAL)%>%
-  select(Tvec, celldensity,Condition_sample,gam_pred,Condition) %>%
-  group_by(brand,batch_number)
 
 #Plot
-
-all_gamma_plot<- cell_density_gamma_model %>%
-ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number,Sample_condition),color=Sample_condition))+ 
+all_gamma_plot<- cell_density_gamma %>%
+  dplyr::select(Tvec, celldensity,brand, batch_number)%>%
+  ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number),color=brand))+ 
   geom_line() +
   geom_point()+
-  labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")+
+  labs(title = "Cell density in wort according to fermentation time (gamma model)", x="Fermentation time (hours)",y="Cell density")+
   theme_classic()
 
+
 single_gamma_plot<- cell_density_gamma_model %>%
-  dplyr::filter(brand == "beer_d", batch_number == 2) %>%
-  ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number,Sample_condition),color=Sample_condition))+
+  dplyr::filter(brand == "beer_a", batch_number == 5) %>%
+  ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number,Condition),color=Condition))+
   geom_point() +
   geom_line()+
   labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")+
   theme_classic()
-
 
 
 single_gamma_plot
@@ -132,6 +119,7 @@ all_gamma_plot
 
 ```{r}
 gam_a_guess <- c(1,3,15)
+
 tvec_a = cell_density$Tvec
 Obs_a = cell_density$celldensity
 
@@ -140,43 +128,42 @@ gam_a_fits <- cell_density %>%
   summarize(gam_a_pars = est_gam_a_pars(gam_a_guess, tvec_a, Obs_a),
   samp_count = n())
 
+gam_a_pars= est_gam_a_pars(gam_a_guess,tvec_a,Obs_a)
 
-#gam_a_pars= est_gam_a_pars(gamAPar,gam_a_rss,tvec_plus,gamAPred)
+gam_a_pred=gam_a_func(unlist(gam_a_pars),tvec_a)
 
-gam_a_pred=gam_a_func(gam_a_pars,tvec_a)
+#gamma + model
 
-#Condition of the data in the plot
-
-Condition_a<-c("Gamma + model data")
-PVAL_a<-data.frame(tvec_a,gam_a_pred,Condition_a)
+Condition_m_a<-c("Gamma + model data")
 
 
-beer_a_b5$Condition_sample <-paste(beer_a_b5$brand,beer_a_b5$batch_number,sep="_b")
-cell_density_gamma_a=data.frame(cell_density,'Condition_sample'=beer_a_b5$Condition_sample )%>%
-  select(Tvec, celldensity,Condition_sample)
+cell_density_gamma_a<-data.frame('Tvec'=tvec_a,'celldensity'=gam_a_pred,'brand'=cell_density$brand,'batch_number'=cell_density$batch_number,'Condition'=Condition_m_a)
 
+cell_density_empirical=data.frame(cell_density,'Condition'= Condition_e)
 
-Sample_condition_a=c(cell_density_gamma_a$Condition_sample,PVAL_a$Condition_a)
-cell_density_gamma_a_model=data.frame(cell_density_gamma_a,PVAL_a)%>%
-  select(Tvec, celldensity,Condition_sample,Pval_a,Condition_a)
+cell_density_gamma_a_model=bind_rows(cell_density_gamma_a,cell_density_empirical)
+
 
 #Plot
 
 
-all_gamma_a_plot<- cell_density_gamma_a_model %>%
-ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number,Sample_condition_a),color=Sample_condition_a))+ 
+all_gamma_a_plot<- cell_density_gamma_a %>%
+dplyr::select(Tvec, celldensity,brand, batch_number)%>%
+ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number),color=brand))+ 
   geom_line() +
   geom_point()+
   labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")+
   theme_classic()
 
+
 single_gamma_a_plot<- cell_density_gamma_a_model %>%
-  dplyr::filter(brand == "beer_d", batch_number == 2) %>%
-  ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number,Sample_condition_a),color=Sample_condition_a))+
+  dplyr::filter(brand == "beer_a", batch_number == 5) %>%
+  ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number,Condition),color=Condition))+
   geom_point() +
   geom_line()+
   labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")+
   theme_classic()
+
 
 single_gamma_a_plot
 all_gamma_a_plot
@@ -185,13 +172,18 @@ all_gamma_a_plot
 ```
 ## ## Cell density and models common plot
 ```{r}
-cell_density_gamma_a_model%>%
-  select(Pval_a,Condition_a)
-cell_density_models=data.frame(cell_density_gamma_model,cell_density_gamma_a_model)%>%
-  select(Tvec,celldensity, Condition_sample,Pval,Condition,Pval_a,Condition_a)
-cell_density_common
 
-cell_density_common_plot=ggplot(data=cell_density_common,aes(x=Tvec))+geom_line(aes(y=celldensity,colour = factor(Condition_sample)))+geom_point(aes(y=celldensity,colour = factor(Condition_sample)))+geom_line(aes(y=Pval,colour = factor(Condition)))+geom_point(aes(y=Pval,colour = factor(Condition)))+geom_line(aes(y=Pval_a,colour = factor(Condition_a)))+geom_point(aes(y=Pval_a,colour = factor(Condition_a)))+labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")
+
+cell_density_common_model=bind_rows(cell_density_gamma_a,cell_density_empirical,cell_density_gamma)
+
+cell_density_common_plot<- cell_density_common_model %>%
+  dplyr::filter(brand == "beer_a", batch_number == 5) %>%
+  ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number,Condition),color=Condition))+
+  geom_point() +
+  geom_line()+
+  labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")+
+  theme_classic()
+
 
 cell_density_common_plot
 

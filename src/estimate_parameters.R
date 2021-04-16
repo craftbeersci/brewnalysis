@@ -38,15 +38,17 @@ est_exp_pars <- function(exp_guess, tvec, obs){
 # Function for cells in suspension
 
 #gama
-est_gam_pars <- function(gam_guess, tvec, obs){
+
+est_gam_pars <- function(gam_guess,tvec, obs){
   gam_fit <- optim(par = gam_guess, fn = gam_rss, method = "Nelder-Mead", tvec = tvec, obs = obs)
   gam_pars <- c(gam_fit$par, gam_fit$value)
   return(list(gam_pars))
 }
 
 
+
 #gama+
-est_gam_a_pars <- function(gam_a_guess, tvec, obs){
+est_gam_a_pars <- function(gam_a_guess,tvec, obs){
   gam_a_fit <- optim(par = gam_a_guess, fn = gam_a_rss , method = "Nelder-Mead", tvec = tvec, obs = obs)
   gam_a_pars <- c(gam_a_fit$par, gam_a_fit$value)
   return(list(gam_a_pars))
