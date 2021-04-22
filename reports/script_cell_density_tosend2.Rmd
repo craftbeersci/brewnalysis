@@ -26,7 +26,7 @@ source("../src/estimate_parameters.R")
 ## Loading Brewery Data
 
 ```{r}
-fermentation_data <- read_excel("~/brewnalysis/brewnalysis/data/brewnalysis_test_data.xlsx") %>%
+fermentation_data <- read_excel("../data/brewnalysis_test_data.xlsx") %>%
   janitor::clean_names() %>% na.omit() %>%
   dplyr::select(brand, batch_number,date,sample_time,dilution_factor,cell_count_1_live_cells,cell_count_1_squares_counted,cell_count_2_live_cells,cell_count_2_squares_counted,fermentation_day)
 
