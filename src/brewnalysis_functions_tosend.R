@@ -7,17 +7,24 @@
 #To change these default value type cell_count_func(data,L="enter the length of 
 #the square",D="Enter the depth of the square")
 
-#***************************CELL DENSITY ************************************
+#***************************DATA HOMOGENEITY ***********************************
 
-cell_count_func <- function(ferment_data,L=0.2,D=0.1){
-  volume = L*L*D
-  squares_counted = ferment_data$cell_count_1_squares_counted
-  cell_count = ferment_data$cell_count_1_live_cells
-  dilution = ferment_data$dilution_factor
-  ave_cells_sq = ((cell_count/squares_counted)*dilution)/volume
-  return(ave_cells_sq)
+data_homog <- function (ferment_data,L=0.2,D=0.1) {
+   
+    volume = L*L*D
+    squares_counted = ferment_data$cell_count_square
+    cell_count = ferment_data$cell_count_live_cells
+    dilution = ferment_data$dilution_factor
+    ave_cells_sq = ((cell_count/squares_counted)*dilution)/volume 
+
+  
+return(ave_cells_sq)
 }
+  
 
+
+
+#cell_count_func <- function(ferment_data,L=0.2,D=0.1){
 
 #*******************************************************************************
 
@@ -40,7 +47,7 @@ TvecFunc<-function(ferment_data){
 
 
 Cell_dens_func = function(ferment_data, L=.2,D=.1) {
-  celldensity = cell_count_func(ferment_data, L, D)
+  celldensity = ferment_data$celldensity
   tvec = TvecFunc(ferment_data)
   results = data.frame(tvec,celldensity)
   return(results)

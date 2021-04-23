@@ -1,7 +1,7 @@
 ---
 title: "cell_density"
 author: "Bertille Smith"
-date: "3/5/2021"
+date: "4/22/2021"
 output: html_document
 ---
 
@@ -18,7 +18,6 @@ source("../src/brewnalysis_functions_tosend.R")
 source("../src/model_functions.R")
 source("../src/rss_calculation_functions.R")
 source("../src/estimate_parameters.R")
-
 ```
 
 ## Loading Brewery Data
@@ -26,8 +25,15 @@ source("../src/estimate_parameters.R")
 ```{r}
 fermentation_data <- read_excel("~/brewnalysis/brewnalysis/data/brewnalysis_test_data.xlsx") %>%
   janitor::clean_names() %>% na.omit() %>%
-  dplyr::select(brand, batch_number,date,sample_time,dilution_factor,cell_count_1_live_cells,cell_count_1_squares_counted,cell_count_2_live_cells,cell_count_2_squares_counted)
+  dplyr::select(brand, batch_number,date,sample_time,dilution_factor,cell_count_live_cells,cell_count_square) 
 
+if (("cell_count_square" %in% colnames(fermentation_data)) & ("cell_count_live_cells" %in% colnames(fermentation_data)) & ("dilution_factor" %in% colnames(fermentation_data))) {
+  fermentation_data <- dplyr::mutate(fermentation_data,celldensity= (data_homog(fermentation_data))) 
+} else{
+  'celldensity'= fermentation_data$cell_density
+}
+
+# change fermentation_data$cell_density with fermentation_data$<name of the cell density column>
 
 cell_density=fermentation_data %>% 
   group_by(brand,batch_number) %>% 
@@ -172,6 +178,7 @@ all_gamma_a_plot
 
 
 ```
+
 ## ## Cell density and models common plot
 ```{r}
 
