@@ -29,25 +29,32 @@ return(cell_density)
 #*******************************************************************************
 
 
-# TvecFunc that uses the 'date' therefore cannot be used with all datasets
-#TvecFunc<-function(ferment_data){
- # Time<-ferment_data[,c('date','sample_time')]
-  #Time<-paste(Time$date, format(as.POSIXct(Time$sample_time), '%T'))
-  #Tvec = 0
-  #for(i in 2:(length(Time))) {
-   # start<- Time[i-1]
-    #finish<- Time[i]
-    #A<-difftime(finish,start,units="hours")
-    #Tvec = c(Tvec,A)
-  #}
-  #print(Tvec)
- #z<-data.frame(Tvec)
- # return(z)
-#}  
+#TvecFunc that uses the 'date' therefore cannot be used with all datasets
+TvecFunc_date<-function(ferment_data){
+  Time<-ferment_data[,c('date','sample_time')]
+  Time<-paste(Time$date, format(as.POSIXct(Time$sample_time), '%T'))
+  Tvec = 0
+  for(i in 2:(length(Time))) {
+    start<- Time[i-1]
+    finish<- Time[i]
+    A<-difftime(finish,start,units="hours")
+    Tvec = c(Tvec,A)
+  }
+  print(Tvec)
+ z<-data.frame(Tvec)
+  return(z)
+}  
+
+Cell_dens_func_date = function(ferment_data, L=.2,D=.1) {
+  celldensity = ferment_data$celldensity
+  tvec = TvecFunc_date(ferment_data)
+  results = data.frame(tvec,celldensity)
+  return(results)
+}
 
 # TvecFunc that uses the 'fermentation_day' 
 
-TvecFunc<-function(ferment_data){
+TvecFunc_fermentation_day<-function(ferment_data){
   
   fermentation_day<-data.frame(ferment_data$fermentation_day)
   fermentation_hour<-fermentation_day*24
@@ -68,35 +75,14 @@ TvecFunc<-function(ferment_data){
 }  
 
 
-
-#TvecFunc2<-function(ferment_data){
-  
-  #fermentation_day<-data.frame(fermentation_data$fermentation_day)
-  #fermentation_hour<-fermentation_day*24
- 
- #Time<-ferment_data$sample_time
- 
-  #Tvec = 0
-  #for(i in 2:(length(Time))) {
-    #start<- Time[i-1]
-    #finish<- Time[i]
-    #A<-difftime(finish,start,units="hours")
-    #Tvec = c(Tvec,A)
-  #}
-  #Tvec= fermentation_hour+ Tvec
-  #print(Tvec)
-  #z<-data.frame(Tvec)
-  #return(z)
-#}  
-
-
-
-Cell_dens_func = function(ferment_data, L=.2,D=.1) {
+Cell_dens_func_fermentation_day = function(ferment_data, L=.2,D=.1) {
   celldensity = ferment_data$celldensity
-  tvec = TvecFunc(ferment_data)
+  tvec = TvecFunc_fermentation_day(ferment_data)
   results = data.frame(tvec,celldensity)
   return(results)
 }
+
+
 
 
 

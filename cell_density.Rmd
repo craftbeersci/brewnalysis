@@ -26,17 +26,17 @@ source("../src/estimate_parameters.R")
 #__________________________________________Import dataset ____________________________________________
 #FM
 #fermentation_data <- read_excel("~/brewnalysis/brewnalysis/data/brewnalysis_test_data.xlsx") %>%
-  #janitor::clean_names() %>% na.omit() %>%
+ # janitor::clean_names() %>% na.omit() %>%
   #dplyr::select(brand, batch_number,fermentation_day,date,sample_time,dilution_factor,cell_count_1_live_cells,cell_count_2_live_cells,cell_count_1_squares_counted,cell_count_2_squares_counted) 
 
 
 
 #CCB
+
 fermentation_data <- read_excel("~/brewnalysis/brewnalysis/data/ccb_ale1_tidy_fermdata.xlsx") %>%
   janitor::clean_names() %>% na.omit() %>%
-  dplyr::select(brand, batch_num,ferm_day,sample_time,cell_count) 
+  dplyr::select(brand, 'batch_number'=batch_num,'fermentation_day'=ferm_day,sample_time,cell_count) 
 #______________________________________________________________________________________________________
-
 
 
 
@@ -44,47 +44,59 @@ fermentation_data <- read_excel("~/brewnalysis/brewnalysis/data/ccb_ale1_tidy_fe
 #___________________________________________Run if necessary__________________________________________
 
 #FM : merge the number of cells counted and the number of squares counted into 1 value
-fermentation_data <- dplyr::mutate(fermentation_data,cell_count=cell_count_1_live_cells+cell_count_2_live_cells, square_count=cell_count_1_squares_counted+cell_count_2_squares_counted)
+#fermentation_data <- dplyr::mutate(fermentation_data,cell_count=cell_count_1_live_cells+cell_count_2_live_cells, square_count=cell_count_1_squares_counted+cell_count_2_squares_counted)
 
 #CCB : convert the cell density unit
-fermentation_data <- dplyr::mutate(fermentation_data,cell_density=cell_count*10^6)
+fermentation_data <- dplyr::mutate(fermentation_data,'celldensity'=cell_count*10^6)
 #______________________________________________________________________________________________________
 
 
 if (("square_count" %in% colnames(fermentation_data)) & ("cell_count" %in% colnames(fermentation_data)) & ("dilution_factor" %in% colnames(fermentation_data))) {
   fermentation_data <- dplyr::mutate(fermentation_data,celldensity= (data_homog(fermentation_data))) 
-} else{
-  'celldensity'= fermentation_data$cell_density
-}
+} 
+```
 
-# change fermentation_data$cell_density with fermentation_data$<name of the cell density column>
 
-#cell_density=fermentation_data %>% 
- # group_by(brand,batch_number) %>% 
-  #group_map(~ Cell_dens_func(.x))
+```{r}
 
+#All the batches
+
+if ("date" %in% colnames(fermentation_data)) {
 cell_density=fermentation_data %>% 
   group_by(brand,batch_number) %>% 
-  group_map(~ Cell_dens_func2(.x))
+  group_map(~ Cell_dens_func_date(.x))
+}else{
+  cell_density=fermentation_data %>% 
+  group_by(brand,batch_number) %>% 
+  group_map(~ Cell_dens_func_fermentation_day(.x))
+}
 
-  cell_density=bind_rows(cell_density)
+cell_density=bind_rows(cell_density)
+
+cell_density=data.frame(cell_density,'brand' = fermentation_data$brand, 'batch_number' = fermentation_data$batch_number) %>%
+  dplyr::rename (Tvec= ferment_data.fermentation_day)
+
   
-cell_density=data.frame(cell_density,'brand' = fermentation_data$brand, 'batch_number' = fermentation_data$batch_number)
-
 cell_dens_plot <- ggplot(cell_density, aes(x = Tvec, y = celldensity, group = interaction(brand, batch_number), color = brand)) +
   geom_point() +
   geom_line() +
   labs(title = "Cell density in wort according to fermentation time", x="Fermentation time (hours)",y="Cell density")+
   theme_classic()
 
-# Loading Brewery Data : Single Batch
+#  Single Batch
 
 single_batch <- fermentation_data %>%
-  dplyr::filter(brand == "beer_a", batch_number == 5)
+  dplyr::filter(brand == "ale1", batch_number == 1)
 
-single_cell_density=Cell_dens_func(single_batch)
+if ("date" %in% colnames(single_batch)) {
+single_cell_density= Cell_dens_func_date(single_batch)
+}else{
+  single_cell_density= Cell_dens_func_fermentation_day(single_batch)
+}
 
-single_cell_density=data.frame(single_cell_density,'brand' = single_batch$brand, 'batch_number' = single_batch$batch_number)
+single_cell_density=data.frame(single_cell_density,'brand' = single_batch$brand, 'batch_number' = single_batch$batch_number)%>%
+  dplyr::rename (Tvec= ferment_data.fermentation_day)
+
 single_cell_dens_plot <-ggplot(single_cell_density, aes(x = Tvec, y = celldensity, group = interaction(brand, batch_number), color = interaction(brand,batch_number))) +
   geom_point() +
   geom_line() +
@@ -138,7 +150,7 @@ all_gamma_plot<- cell_density_gamma %>%
 
 
 single_gamma_plot<- cell_density_gamma_model %>%
-  dplyr::filter(brand == "beer_b", batch_number == 2) %>%
+  dplyr::filter(brand == "ale1", batch_number == 5) %>%
   ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number,Condition),color=Condition))+
   geom_point() +
   geom_line()+
@@ -193,7 +205,7 @@ ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number),color=b
 
 
 single_gamma_a_plot<- cell_density_gamma_a_model %>%
-  dplyr::filter(brand == "beer_a", batch_number == 5) %>%
+  dplyr::filter(brand == "ale1", batch_number == 3) %>%
   ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number,Condition),color=Condition))+
   geom_point() +
   geom_line()+
@@ -214,7 +226,7 @@ all_gamma_a_plot
 cell_density_common_model=bind_rows(cell_density_gamma_a,cell_density_empirical,cell_density_gamma)
 
 cell_density_common_plot<- cell_density_common_model %>%
-  dplyr::filter(brand == "beer_a", batch_number == 5) %>%
+  dplyr::filter(brand == "ale1", batch_number == 2) %>%
   ggplot(aes(x=Tvec, y=celldensity, group=interaction(brand, batch_number,Condition),color=Condition))+
   geom_point() +
   geom_line()+
