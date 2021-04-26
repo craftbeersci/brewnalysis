@@ -11,14 +11,14 @@
 
 data_homog <- function (ferment_data,L=0.2,D=0.1) {
    
-    volume = L*L*D
-    squares_counted = ferment_data$cell_count_square
-    cell_count = ferment_data$cell_count_live_cells
+    volume = (L*L*D)*10^-3
+    squares_counted = ferment_data$square_count
+    cell_count = ferment_data$cell_count
     dilution = ferment_data$dilution_factor
-    ave_cells_sq = ((cell_count/squares_counted)*dilution)/volume 
-
+    cell_density = ((cell_count/squares_counted)*dilution)/volume 
+    
   
-return(ave_cells_sq)
+return(cell_density)
 }
   
 

@@ -25,9 +25,12 @@ source("../src/estimate_parameters.R")
 ```{r}
 fermentation_data <- read_excel("~/brewnalysis/brewnalysis/data/brewnalysis_test_data.xlsx") %>%
   janitor::clean_names() %>% na.omit() %>%
-  dplyr::select(brand, batch_number,date,sample_time,dilution_factor,cell_count_live_cells,cell_count_square) 
+  dplyr::select(brand, batch_number,date,sample_time,dilution_factor,cell_count_1_live_cells,cell_count_2_live_cells,cell_count_1_squares_counted,cell_count_2_squares_counted) 
 
-if (("cell_count_square" %in% colnames(fermentation_data)) & ("cell_count_live_cells" %in% colnames(fermentation_data)) & ("dilution_factor" %in% colnames(fermentation_data))) {
+#run if necessary
+fermentation_data <- dplyr::mutate(fermentation_data,cell_count=cell_count_1_live_cells+cell_count_2_live_cells, square_count=cell_count_1_squares_counted+cell_count_2_squares_counted)
+
+if (("square_count" %in% colnames(fermentation_data)) & ("cell_count" %in% colnames(fermentation_data)) & ("dilution_factor" %in% colnames(fermentation_data))) {
   fermentation_data <- dplyr::mutate(fermentation_data,celldensity= (data_homog(fermentation_data))) 
 } else{
   'celldensity'= fermentation_data$cell_density
