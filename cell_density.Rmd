@@ -23,12 +23,33 @@ source("../src/estimate_parameters.R")
 ## Loading Brewery Data
 
 ```{r}
-fermentation_data <- read_excel("~/brewnalysis/brewnalysis/data/brewnalysis_test_data.xlsx") %>%
-  janitor::clean_names() %>% na.omit() %>%
-  dplyr::select(brand, batch_number,date,sample_time,dilution_factor,cell_count_1_live_cells,cell_count_2_live_cells,cell_count_1_squares_counted,cell_count_2_squares_counted) 
+#__________________________________________Import dataset ____________________________________________
+#FM
+#fermentation_data <- read_excel("~/brewnalysis/brewnalysis/data/brewnalysis_test_data.xlsx") %>%
+  #janitor::clean_names() %>% na.omit() %>%
+  #dplyr::select(brand, batch_number,fermentation_day,date,sample_time,dilution_factor,cell_count_1_live_cells,cell_count_2_live_cells,cell_count_1_squares_counted,cell_count_2_squares_counted) 
 
-#run if necessary
+
+
+#CCB
+fermentation_data <- read_excel("~/brewnalysis/brewnalysis/data/ccb_ale1_tidy_fermdata.xlsx") %>%
+  janitor::clean_names() %>% na.omit() %>%
+  dplyr::select(brand, batch_num,ferm_day,sample_time,cell_count) 
+#______________________________________________________________________________________________________
+
+
+
+
+
+#___________________________________________Run if necessary__________________________________________
+
+#FM : merge the number of cells counted and the number of squares counted into 1 value
 fermentation_data <- dplyr::mutate(fermentation_data,cell_count=cell_count_1_live_cells+cell_count_2_live_cells, square_count=cell_count_1_squares_counted+cell_count_2_squares_counted)
+
+#CCB : convert the cell density unit
+fermentation_data <- dplyr::mutate(fermentation_data,cell_density=cell_count*10^6)
+#______________________________________________________________________________________________________
+
 
 if (("square_count" %in% colnames(fermentation_data)) & ("cell_count" %in% colnames(fermentation_data)) & ("dilution_factor" %in% colnames(fermentation_data))) {
   fermentation_data <- dplyr::mutate(fermentation_data,celldensity= (data_homog(fermentation_data))) 
@@ -38,9 +59,13 @@ if (("square_count" %in% colnames(fermentation_data)) & ("cell_count" %in% colna
 
 # change fermentation_data$cell_density with fermentation_data$<name of the cell density column>
 
+#cell_density=fermentation_data %>% 
+ # group_by(brand,batch_number) %>% 
+  #group_map(~ Cell_dens_func(.x))
+
 cell_density=fermentation_data %>% 
   group_by(brand,batch_number) %>% 
-  group_map(~ Cell_dens_func(.x))
+  group_map(~ Cell_dens_func2(.x))
 
   cell_density=bind_rows(cell_density)
   

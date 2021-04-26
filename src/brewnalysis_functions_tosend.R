@@ -28,9 +28,31 @@ return(cell_density)
 
 #*******************************************************************************
 
+
+# TvecFunc that uses the 'date' therefore cannot be used with all datasets
+#TvecFunc<-function(ferment_data){
+ # Time<-ferment_data[,c('date','sample_time')]
+  #Time<-paste(Time$date, format(as.POSIXct(Time$sample_time), '%T'))
+  #Tvec = 0
+  #for(i in 2:(length(Time))) {
+   # start<- Time[i-1]
+    #finish<- Time[i]
+    #A<-difftime(finish,start,units="hours")
+    #Tvec = c(Tvec,A)
+  #}
+  #print(Tvec)
+ #z<-data.frame(Tvec)
+ # return(z)
+#}  
+
+# TvecFunc that uses the 'fermentation_day' 
+
 TvecFunc<-function(ferment_data){
-  Time<-ferment_data[,c('date','sample_time')]
-  Time<-paste(Time$date, format(as.POSIXct(Time$sample_time), '%T'))
+  
+  fermentation_day<-data.frame(ferment_data$fermentation_day)
+  fermentation_hour<-fermentation_day*24
+  
+  Time<-ferment_data$sample_time
   Tvec = 0
   for(i in 2:(length(Time))) {
     start<- Time[i-1]
@@ -38,11 +60,34 @@ TvecFunc<-function(ferment_data){
     A<-difftime(finish,start,units="hours")
     Tvec = c(Tvec,A)
   }
+
+  Tvec= fermentation_hour+ Tvec
   print(Tvec)
- z<-data.frame(Tvec)
+  z<-data.frame(Tvec)
   return(z)
 }  
 
+
+
+#TvecFunc2<-function(ferment_data){
+  
+  #fermentation_day<-data.frame(fermentation_data$fermentation_day)
+  #fermentation_hour<-fermentation_day*24
+ 
+ #Time<-ferment_data$sample_time
+ 
+  #Tvec = 0
+  #for(i in 2:(length(Time))) {
+    #start<- Time[i-1]
+    #finish<- Time[i]
+    #A<-difftime(finish,start,units="hours")
+    #Tvec = c(Tvec,A)
+  #}
+  #Tvec= fermentation_hour+ Tvec
+  #print(Tvec)
+  #z<-data.frame(Tvec)
+  #return(z)
+#}  
 
 
 
