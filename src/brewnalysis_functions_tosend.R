@@ -24,7 +24,6 @@ return(cell_density)
 
 
 
-#cell_count_func <- function(ferment_data,L=0.2,D=0.1){
 
 #*******************************************************************************
 
