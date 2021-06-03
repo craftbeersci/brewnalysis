@@ -52,7 +52,7 @@ gam_rss <- function(vars, tvec, obs){
 
 #gam +
 gam_a_rss <- function(vars, tvec, obs){
-  y_pred <- gamAFunc(vars, tvec)
+  y_pred <- gam_a_func(vars, tvec)
   gam_a_rss <- sum((y_pred-obs)^2)
   return(gam_a_rss)
 }
