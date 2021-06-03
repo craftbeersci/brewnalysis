@@ -112,7 +112,7 @@ single_cell_dens_plot <-ggplot(single_cell_density, aes(x = Tvec, y = celldensit
 
 ```{r}
 #Plots
-cell_dens_plot
+cell_dens_plot 
 single_cell_dens_plot
 
 ```
@@ -127,15 +127,22 @@ gam_fits <- cell_density %>%
   summarize(gam_pars = est_gam_pars(gam_guess, Tvec, celldensity),
   samp_count = n())
 
-gam_pars=est_gam_pars(gam_guess,gam_fits[1],gam_fits[2]) 
-gam_pred=gam_func(unlist(gam_pars),tvec)
+
+plot_data <- gam_fits %>% left_join(cell_density) %>% rowwise() %>% mutate(gam_pred = gam_func(unlist(gam_pars[1:3]), Tvec)) 
+  
+  
+  # %>% dplyr::select(brand, batch_number,Tvec, gam_pred, cell_density, gam_pars) %>%
+ # pivot_longer(c(gravity, log_pred, gen_log_pred,exp_pred), names_to = "model_id", values_to = "specific_gravity")
+
+###gam_pars=est_gam_pars(gam_guess,gam_fits[1],gam_fits[2]) 
+####gam_pred=gam_func(unlist(gam_pars),tvec)
 
 #gamma model
 
 Condition_m<-c("Gamma model data")
 Condition_e<-c("Empirical data")
 
-cell_density_gamma<-data.frame('Tvec'=tvec,'celldensity'=gam_pred,'brand'=cell_density$brand,'batch_number'=cell_density$batch_number,'Condition'=Condition_m)
+cell_density_gamma<-data.frame('Tvec'=plot_data$Tvec,'celldensity'=plot_data$gam_pred,'brand'=plot_data$brand,'batch_number'=plot_data$batch_number,'Condition'=Condition_m)
 cell_density_empirical=data.frame(cell_density,'Condition'= Condition_e)
 cell_density_gamma_model=bind_rows(cell_density_gamma,cell_density_empirical)
 
@@ -183,14 +190,18 @@ gam_a_fits <- cell_density %>%
   group_by(brand, batch_number) %>%
   summarize(gam_a_pars = est_gam_a_pars(gam_a_guess, Tvec, celldensity),
   samp_count = n())
-gam_a_pars= est_gam_a_pars(gam_a_guess,tvec_a,Obs_a)
-gam_a_pred=gam_a_func(unlist(gam_a_pars),tvec_a)
+
+plot_data_a <- gam_a_fits %>% left_join(cell_density) %>% rowwise() %>% mutate(gam_a_pred = gam_a_func(unlist(gam_a_pars[1:4]), Tvec)) 
+
+#gam_a_pars= est_gam_a_pars(gam_a_guess,tvec_a,Obs_a)
+#gam_a_pred=gam_a_func(unlist(gam_a_pars),tvec_a)
 
 #gamma + model
 Condition_m_a<-c("Gamma + model data")
-cell_density_gamma_a<-data.frame('Tvec'=tvec_a,'celldensity'=gam_a_pred,'brand'=cell_density$brand,'batch_number'=cell_density$batch_number,'Condition'=Condition_m_a)
+cell_density_gamma_a<-data.frame('Tvec'=plot_data_a$Tvec,'celldensity'=plot_data_a$gam_a_pred,'brand'=plot_data_a$brand,'batch_number'=plot_data_a$batch_number,'Condition'=Condition_m_a)
 cell_density_empirical=data.frame(cell_density,'Condition'= Condition_e)
 cell_density_gamma_a_model=bind_rows(cell_density_gamma_a,cell_density_empirical)
+
 
 
 #Plot
